@@ -1,5 +1,8 @@
 
+'use client';
+
 import { Button } from "@/components/ui/button";
+import { motion } from 'framer-motion';
 
 const Hero = () => {
   return (
@@ -21,7 +24,11 @@ const Hero = () => {
 
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto py-32">
-        <div className="animate-fade-in">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.5, ease: "easeOut" }}
+        >
           <h1 className="text-5xl md:text-7xl font-heading font-bold mb-8 text-white leading-tight" style={{ lineHeight: '1.58' }}>
             Curated for Connoisseurs
           </h1>
@@ -36,7 +43,7 @@ const Hero = () => {
           >
             Explore Our Collection
           </Button>
-        </div>
+        </motion.div>
       </div>
 
       {/* Elegant scroll indicator */}

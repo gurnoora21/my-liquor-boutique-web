@@ -1,5 +1,8 @@
 
+'use client';
+
 import { useState, useEffect } from "react";
+import { motion } from 'framer-motion';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -24,7 +27,13 @@ const Header = () => {
   ];
 
   return (
-    <header className="fixed top-0 w-full z-50 transition-all duration-300 backdrop-blur-[20px] border-b border-white/10" style={{ backgroundColor: 'rgba(10, 10, 10, 0.8)' }}>
+    <motion.header 
+      className="fixed top-0 w-full z-50 transition-all duration-300 backdrop-blur-[20px] border-b border-white/10" 
+      style={{ backgroundColor: 'rgba(10, 10, 10, 0.8)' }}
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+    >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -77,7 +86,7 @@ const Header = () => {
           </div>
         )}
       </div>
-    </header>
+    </motion.header>
   );
 };
 
