@@ -8,7 +8,7 @@ import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Features from "@/components/Features";
 import Locations from "@/components/Locations";
-import CurrentFlyer from "@/components/CurrentFlyer";
+import WeeklySpecials from "@/components/WeeklySpecials";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -44,7 +44,7 @@ const Index = () => {
           <About />
           <Features />
           <Locations />
-          <CurrentFlyer />
+          <WeeklySpecials />
           <Footer />
         </>
       )}
