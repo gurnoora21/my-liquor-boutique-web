@@ -1,62 +1,113 @@
 
 'use client';
 
-import { Wine, Phone, Star } from "@phosphor-icons/react";
-import AnimatedSection from './AnimatedSection';
+import { Beer, DollarSign, Users } from "lucide-react";
+import { motion } from 'framer-motion';
+import { useInView } from 'framer-motion';
+import { useRef } from 'react';
 
 const Features = () => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.3 });
+
   const features = [
     {
-      icon: <Wine className="w-8 h-8 text-warm-gold" />,
-      title: "Curated Selection",
-      description: "Hand-picked premium spirits, wines, and craft beverages from around the world"
+      icon: <Beer className="w-8 h-8 text-white" />,
+      title: "Great Selection, Fair Prices",
+      description: "Wide variety of beer, wine, and spirits at prices that won't break the bank"
     },
     {
-      icon: <Star className="w-8 h-8 text-warm-gold" />,
-      title: "Price Match Guarantee",
-      description: "We match any competitor's advertised price to ensure you get the best value"
+      icon: <DollarSign className="w-8 h-8 text-white" />,
+      title: "We'll Beat Any Local Price",
+      description: "Found it cheaper locally? Bring us the ad and we'll match it, guaranteed"
     },
     {
-      icon: <Star className="w-8 h-8 text-warm-gold" />,
-      title: "Expert Guidance",
-      description: "Our passionate staff provides personalized recommendations for every taste"
+      icon: <Users className="w-8 h-8 text-white" />,
+      title: "Friendly Staff Who Know Their Stuff",
+      description: "Our team is here to help you find exactly what you're looking for"
     }
   ];
 
-  return (
-    <AnimatedSection>
-      <section className="py-40 bg-dark-bg relative">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-24">
-            <h2 className="text-4xl md:text-5xl font-heading font-bold text-white mb-8" style={{ lineHeight: '1.32' }}>
-              Why Choose <span className="text-warm-gold">My Liquor</span>
-            </h2>
-            <div className="w-24 h-0.5 bg-warm-gold mx-auto"></div>
-          </div>
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {features.map((feature, index) => (
-              <div 
-                key={index}
-                className="text-center p-8 bg-charcoal rounded-lg border border-warm-gold/20 hover:border-warm-gold/50 transition-all duration-300 group"
-              >
-                <div className="mb-6 flex justify-center">
+  const itemVariants = {
+    hidden: { 
+      opacity: 0, 
+      y: 30 
+    },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  return (
+    <section className="py-32 bg-dark-bg relative" ref={ref}>
+      <div className="container mx-auto px-4">
+        <motion.div 
+          className="text-center mb-20"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <h2 className="text-3xl md:text-4xl font-heading font-bold text-white mb-6">
+            Why Choose <span className="text-warm-gold">My Liquor</span>
+          </h2>
+          <div className="w-16 h-px bg-warm-gold mx-auto"></div>
+        </motion.div>
+
+        <motion.div 
+          className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto"
+          variants={containerVariants}
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+        >
+          {features.map((feature, index) => (
+            <motion.div 
+              key={index}
+              variants={itemVariants}
+              className="text-center p-6 bg-charcoal rounded-lg border border-gray-700 hover:border-warm-gold/50 transition-all duration-300 group hover:-translate-y-1"
+            >
+              <div className="mb-6 flex justify-center">
+                <div className="p-3 rounded-full bg-gray-800 group-hover:bg-warm-gold/10 transition-colors duration-300">
                   {feature.icon}
                 </div>
-                
-                <h3 className="text-lg font-heading font-bold text-white mb-6 group-hover:text-warm-gold transition-colors tracking-wide" style={{ lineHeight: '1.32', letterSpacing: '0.02em' }}>
-                  {feature.title}
-                </h3>
-                
-                <p className="text-gray-300 font-body opacity-80" style={{ lineHeight: '1.8' }}>
-                  {feature.description}
-                </p>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    </AnimatedSection>
+              
+              <h3 className="text-lg font-heading font-semibold text-white mb-4 group-hover:text-warm-gold transition-colors">
+                {feature.title}
+              </h3>
+              
+              <p className="text-gray-300 font-body leading-relaxed">
+                {feature.description}
+              </p>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Additional Info */}
+        <motion.div 
+          className="text-center mt-16 text-gray-400"
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
+          <p className="text-sm">Open Until 10 PM • Weekly Specials • Cold Storage Available</p>
+        </motion.div>
+      </div>
+    </section>
   );
 };
 
