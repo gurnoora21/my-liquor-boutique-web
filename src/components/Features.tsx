@@ -34,17 +34,17 @@ const Features = () => {
           {features.map((feature, index) => (
             <div 
               key={index}
-              className="text-center p-8 bg-charcoal rounded-lg border border-gray-700 hover:border-warm-gold/50 transition-all duration-300 transform hover:scale-105 group"
+              className="text-center p-8 bg-charcoal rounded-lg border border-warm-gold/20 hover:border-warm-gold/50 transition-all duration-300 group"
             >
               <div className="mb-6 flex justify-center">
                 {feature.icon}
               </div>
               
-              <h3 className="text-xl font-heading font-bold text-white mb-6 group-hover:text-warm-gold transition-colors" style={{ lineHeight: '1.32' }}>
+              <h3 className="text-lg font-heading font-bold text-white mb-6 group-hover:text-warm-gold transition-colors tracking-wide" style={{ lineHeight: '1.32', letterSpacing: '0.02em' }}>
                 {feature.title}
               </h3>
               
-              <p className="text-gray-300 font-body" style={{ lineHeight: '1.8' }}>
+              <p className="text-gray-300 font-body opacity-80" style={{ lineHeight: '1.8' }}>
                 {feature.description}
               </p>
             </div>
