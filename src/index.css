@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -98,4 +99,43 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Custom animations and effects */
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 1s ease-out;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b, #d97706);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Custom hover effects */
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+}
+
+/* Scale animation class */
+.hover:scale-102:hover {
+  transform: scale(1.02);
 }
