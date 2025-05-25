@@ -1,7 +1,6 @@
-
 'use client';
 
-import { MapPin, Clock, Phone, ArrowRight, Car, Wheelchair, Banknote, Recycle } from "@phosphor-icons/react";
+import { MapPin, Clock, Phone, ArrowRight, Car, Wheelchair, CreditCard, Recycle } from "@phosphor-icons/react";
 import AnimatedSection from './AnimatedSection';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
@@ -131,7 +130,7 @@ const Locations = () => {
                       Accessible
                     </div>
                     <div className="flex items-center">
-                      <Banknote className="w-4 h-4 text-warm-gold mr-2" />
+                      <CreditCard className="w-4 h-4 text-warm-gold mr-2" />
                       ATM On Site
                     </div>
                     <div className="flex items-center">
