@@ -1,5 +1,6 @@
 
 import { Button } from "@/components/ui/button";
+import { MapPin, Clock, Phone } from "@phosphor-icons/react";
 
 const Locations = () => {
   const locations = [
@@ -18,14 +19,14 @@ const Locations = () => {
   ];
 
   return (
-    <section id="locations" className="py-20 bg-gray-900 relative">
+    <section id="locations" className="py-40 bg-light-bg relative">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Visit Our <span className="text-yellow-400">Locations</span>
+        <div className="text-center mb-24">
+          <h2 className="text-4xl md:text-5xl font-heading font-bold text-charcoal mb-8" style={{ lineHeight: '1.32' }}>
+            Visit Our <span className="text-warm-gold">Locations</span>
           </h2>
-          <div className="w-24 h-0.5 bg-gradient-to-r from-transparent via-yellow-400 to-transparent mx-auto mb-6"></div>
-          <p className="text-xl text-gray-300">
+          <div className="w-24 h-0.5 bg-warm-gold mx-auto mb-8"></div>
+          <p className="text-xl text-gray-600 font-body" style={{ lineHeight: '1.8' }}>
             Two convenient Alberta locations to serve you better
           </p>
         </div>
@@ -34,33 +35,33 @@ const Locations = () => {
           {locations.map((location, index) => (
             <div 
               key={index}
-              className="bg-gradient-to-br from-gray-800 to-black p-8 rounded-lg border border-gray-700 hover:border-yellow-400/50 transition-all duration-300 transform hover:scale-102 group"
+              className="bg-white p-8 rounded-lg border border-gray-200 hover:border-warm-gold/50 transition-all duration-300 transform hover:scale-102 group shadow-lg"
             >
-              <div className="border-l-4 border-yellow-400 pl-6">
-                <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-yellow-400 transition-colors">
+              <div className="border-l-4 border-warm-gold pl-6">
+                <h3 className="text-2xl font-heading font-bold text-charcoal mb-6 group-hover:text-warm-gold transition-colors" style={{ lineHeight: '1.32' }}>
                   {location.name}
                 </h3>
                 
-                <div className="space-y-3 mb-6">
-                  <p className="text-gray-300 flex items-start">
-                    <span className="text-yellow-400 mr-2">📍</span>
+                <div className="space-y-4 mb-8">
+                  <p className="text-gray-600 flex items-start font-body" style={{ lineHeight: '1.8' }}>
+                    <MapPin className="w-5 h-5 text-warm-gold mr-3 mt-1 flex-shrink-0" />
                     {location.address}
                   </p>
                   
-                  <p className="text-gray-300 flex items-center">
-                    <span className="text-yellow-400 mr-2">🕒</span>
+                  <p className="text-gray-600 flex items-center font-body" style={{ lineHeight: '1.8' }}>
+                    <Clock className="w-5 h-5 text-warm-gold mr-3 flex-shrink-0" />
                     {location.hours}
                   </p>
                   
-                  <p className="text-gray-300 flex items-center">
-                    <span className="text-yellow-400 mr-2">📞</span>
+                  <p className="text-gray-600 flex items-center font-body" style={{ lineHeight: '1.8' }}>
+                    <Phone className="w-5 h-5 text-warm-gold mr-3 flex-shrink-0" />
                     {location.phone}
                   </p>
                 </div>
 
                 <Button 
                   variant="outline" 
-                  className="border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all duration-300"
+                  className="border-warm-gold text-warm-gold hover:bg-warm-gold hover:text-charcoal transition-all duration-300"
                 >
                   Get Directions
                 </Button>

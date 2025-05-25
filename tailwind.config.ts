@@ -20,10 +20,15 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				'heading': ['Montserrat', 'sans-serif'],
-				'body': ['Open Sans', 'sans-serif'],
+				'heading': ['Playfair Display', 'serif'],
+				'body': ['Inter', 'sans-serif'],
 			},
 			colors: {
+				// Custom color palette
+				'charcoal': '#1A1A1A',
+				'warm-gold': '#D4AF37',
+				'dark-bg': '#0A0A0A',
+				'light-bg': '#FAFAFA',
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',

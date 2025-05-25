@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { List, X } from "@phosphor-icons/react";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -27,7 +27,7 @@ const Header = () => {
   return (
     <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${
       isScrolled 
-        ? 'bg-black/90 backdrop-blur-md shadow-lg' 
+        ? 'bg-charcoal/90 backdrop-blur-md shadow-lg' 
         : 'bg-transparent'
     }`}>
       <div className="container mx-auto px-4">
@@ -47,7 +47,7 @@ const Header = () => {
               <a
                 key={link.name}
                 href={link.href}
-                className="text-white hover:text-yellow-400 transition-colors duration-300 font-medium"
+                className="text-white hover:text-warm-gold transition-colors duration-300 font-medium"
               >
                 {link.name}
               </a>
@@ -57,21 +57,21 @@ const Header = () => {
           {/* Mobile menu button */}
           <button
             onClick={toggleMenu}
-            className="md:hidden text-white hover:text-yellow-400 transition-colors"
+            className="md:hidden text-white hover:text-warm-gold transition-colors"
           >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMenuOpen ? <X size={24} /> : <List size={24} />}
           </button>
         </div>
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden bg-black/95 backdrop-blur-md">
+          <div className="md:hidden bg-charcoal/95 backdrop-blur-md">
             <nav className="px-4 pt-2 pb-4 space-y-2">
               {navLinks.map((link) => (
                 <a
                   key={link.name}
                   href={link.href}
-                  className="block py-2 text-white hover:text-yellow-400 transition-colors duration-300"
+                  className="block py-2 text-white hover:text-warm-gold transition-colors duration-300"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {link.name}

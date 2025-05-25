@@ -1,27 +1,19 @@
 
 const About = () => {
   return (
-    <section className="py-20 bg-gray-800 relative overflow-hidden">
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 25px 25px, #FFD700 2px, transparent 2px)`,
-          backgroundSize: '50px 50px'
-        }}></div>
-      </div>
-
+    <section className="py-40 bg-light-bg relative overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="mb-4">
-            <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-yellow-400 to-transparent mx-auto mb-8"></div>
+          <div className="mb-16">
+            <div className="w-16 h-0.5 bg-warm-gold mx-auto mb-12"></div>
           </div>
           
-          <h2 className="text-4xl md:text-5xl font-bold mb-8 text-white">
+          <h2 className="text-4xl md:text-5xl font-heading font-bold mb-12 text-charcoal" style={{ lineHeight: '1.32' }}>
             Redefining Your 
-            <span className="text-yellow-400 block">Liquor Experience</span>
+            <span className="text-warm-gold block">Liquor Experience</span>
           </h2>
           
-          <div className="text-lg md:text-xl text-gray-300 leading-relaxed space-y-6">
+          <div className="text-lg md:text-xl text-gray-600 space-y-8 font-body" style={{ lineHeight: '1.8' }}>
             <p>
               At My Liquor, we believe every bottle tells a story. Since our inception, we've been dedicated to bringing you an unparalleled selection of premium spirits, wines, and craft beverages.
             </p>
@@ -31,8 +23,8 @@ const About = () => {
             </p>
           </div>
 
-          <div className="mt-12">
-            <div className="w-24 h-0.5 bg-gradient-to-r from-transparent via-yellow-400 to-transparent mx-auto"></div>
+          <div className="mt-16">
+            <div className="w-24 h-0.5 bg-warm-gold mx-auto"></div>
           </div>
         </div>
       </div>
