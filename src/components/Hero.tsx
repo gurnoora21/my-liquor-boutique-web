@@ -13,8 +13,7 @@ const Hero = () => {
           playsInline
           className="w-full h-full object-cover"
         >
-          <source src="https://cdn.pixabay.com/vimeo/453720634/whiskey-24049.mp4?width=640&hash=5577bb54a7e0db1b4e0c2a4d4eb8ba4b4b4b4b4b" type="video/mp4" />
-          <source src="https://videos.pexels.com/video-files/3191567/3191567-uhd_2560_1440_30fps.mp4" type="video/mp4" />
+          <source src="/lovable-uploads/5230368-hd_1920_1080_25fps.mp4" type="video/mp4" />
         </video>
         {/* Dark overlay for better text readability */}
         <div className="absolute inset-0 bg-black/60"></div>
