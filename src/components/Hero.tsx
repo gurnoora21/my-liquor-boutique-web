@@ -24,7 +24,7 @@ const Hero = () => {
 
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Video Background with Texture Overlay */}
+      {/* Video Background with Grain Overlay */}
       <div className="absolute inset-0 z-0">
         <video
           autoPlay
@@ -35,13 +35,14 @@ const Hero = () => {
         >
           <source src="/lovable-uploads/5230368-hd_1920_1080_25fps.mp4" type="video/mp4" />
         </video>
-        {/* Dark overlay with subtle texture */}
+        {/* Dark overlay */}
         <div className="absolute inset-0 bg-black/70"></div>
+        {/* Subtle film grain texture */}
         <div 
-          className="absolute inset-0 opacity-5"
+          className="absolute inset-0 opacity-[0.03]"
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'%3E%3Cpath d='m0 40l40-40h-40v40z'/%3E%3C/g%3E%3C/svg%3E")`,
-            backgroundSize: '40px 40px'
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4'/%3E%3C/svg%3E")`,
+            backgroundSize: '200px 200px'
           }}
         ></div>
       </div>
