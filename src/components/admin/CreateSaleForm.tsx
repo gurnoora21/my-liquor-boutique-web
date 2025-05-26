@@ -1,177 +1,194 @@
 
-import React from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 import { useSales } from '@/hooks/useSales';
-import { Sale, SaleTheme, THEME_COLORS } from '@/types/sales';
+import { useThemes } from '@/hooks/useThemes';
+import { SaleTheme } from '@/types/sales';
 
 interface CreateSaleFormProps {
   onSuccess: () => void;
 }
 
-interface FormData {
-  name: string;
-  theme: SaleTheme;
-  start_date: string;
-  end_date: string;
-  background_color: string;
-  accent_color: string;
-}
-
 const CreateSaleForm: React.FC<CreateSaleFormProps> = ({ onSuccess }) => {
   const { createSale } = useSales();
-  const form = useForm<FormData>({
-    defaultValues: {
-      name: '',
-      theme: 'general',
-      start_date: '',
-      end_date: '',
-      background_color: THEME_COLORS.general.background,
-      accent_color: THEME_COLORS.general.accent,
-    },
+  const { themes } = useThemes();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    theme: 'general' as SaleTheme,
+    theme_id: '',
+    start_date: '',
+    end_date: '',
+    background_color: '#F59E0B',
+    accent_color: '#1A1A1A'
   });
 
-  const selectedTheme = form.watch('theme');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name || !formData.start_date || !formData.end_date) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
 
-  React.useEffect(() => {
-    const colors = THEME_COLORS[selectedTheme];
-    form.setValue('background_color', colors.background);
-    form.setValue('accent_color', colors.accent);
-  }, [selectedTheme, form]);
-
-  const onSubmit = async (data: FormData) => {
+    setLoading(true);
     try {
       await createSale({
-        ...data,
-        is_active: false,
+        name: formData.name,
+        theme: formData.theme,
+        theme_id: formData.theme_id || null,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
+        background_color: formData.background_color,
+        accent_color: formData.accent_color,
+        is_active: false
       });
-      form.reset();
+
+      toast({
+        title: "Success",
+        description: "Sale created successfully"
+      });
+
+      setFormData({
+        name: '',
+        theme: 'general',
+        theme_id: '',
+        start_date: '',
+        end_date: '',
+        background_color: '#F59E0B',
+        accent_color: '#1A1A1A'
+      });
+
       onSuccess();
     } catch (error) {
-      console.error('Failed to create sale:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create sale",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleThemeChange = (themeId: string) => {
+    const selectedTheme = themes.find(t => t.id === themeId);
+    if (selectedTheme) {
+      setFormData({
+        ...formData,
+        theme_id: themeId,
+        background_color: selectedTheme.background_color,
+        accent_color: selectedTheme.accent_color
+      });
     }
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="name"
-            rules={{ required: 'Sale name is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Sale Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., Halloween Special 2024" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="name">Sale Name</Label>
+        <Input
+          id="name"
+          type="text"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          placeholder="Enter sale name"
+          required
+        />
+      </div>
 
-          <FormField
-            control={form.control}
-            name="theme"
-            rules={{ required: 'Theme is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Theme</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a theme" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="general">General</SelectItem>
-                    <SelectItem value="easter">Easter</SelectItem>
-                    <SelectItem value="halloween">Halloween</SelectItem>
-                    <SelectItem value="victoria-day">Victoria Day</SelectItem>
-                    <SelectItem value="christmas">Christmas</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <div>
+        <Label htmlFor="theme">Theme</Label>
+        <Select value={formData.theme_id} onValueChange={handleThemeChange}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a theme" />
+          </SelectTrigger>
+          <SelectContent>
+            {themes.map((theme) => (
+              <SelectItem key={theme.id} value={theme.id}>
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-4 h-4 rounded"
+                    style={{ backgroundColor: theme.background_color }}
+                  />
+                  {theme.name}
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-          <FormField
-            control={form.control}
-            name="start_date"
-            rules={{ required: 'Start date is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Start Date</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="end_date"
-            rules={{ required: 'End date is required' }}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>End Date</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="background_color"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Background Color</FormLabel>
-                <FormControl>
-                  <div className="flex gap-2">
-                    <Input type="color" {...field} className="w-16 h-10 p-1" />
-                    <Input {...field} placeholder="#F59E0B" />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="accent_color"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Accent Color</FormLabel>
-                <FormControl>
-                  <div className="flex gap-2">
-                    <Input type="color" {...field} className="w-16 h-10 p-1" />
-                    <Input {...field} placeholder="#1A1A1A" />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="start_date">Start Date</Label>
+          <Input
+            id="start_date"
+            type="date"
+            value={formData.start_date}
+            onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+            required
           />
         </div>
-
-        <div className="pt-4">
-          <Button type="submit" className="w-full">
-            Create Sale
-          </Button>
+        <div>
+          <Label htmlFor="end_date">End Date</Label>
+          <Input
+            id="end_date"
+            type="date"
+            value={formData.end_date}
+            onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+            required
+          />
         </div>
-      </form>
-    </Form>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="background_color">Background Color</Label>
+          <div className="flex gap-2">
+            <Input
+              type="color"
+              value={formData.background_color}
+              onChange={(e) => setFormData({ ...formData, background_color: e.target.value })}
+              className="w-16 h-10"
+            />
+            <Input
+              value={formData.background_color}
+              onChange={(e) => setFormData({ ...formData, background_color: e.target.value })}
+              placeholder="#F59E0B"
+            />
+          </div>
+        </div>
+        <div>
+          <Label htmlFor="accent_color">Accent Color</Label>
+          <div className="flex gap-2">
+            <Input
+              type="color"
+              value={formData.accent_color}
+              onChange={(e) => setFormData({ ...formData, accent_color: e.target.value })}
+              className="w-16 h-10"
+            />
+            <Input
+              value={formData.accent_color}
+              onChange={(e) => setFormData({ ...formData, accent_color: e.target.value })}
+              placeholder="#1A1A1A"
+            />
+          </div>
+        </div>
+      </div>
+
+      <Button type="submit" disabled={loading} className="w-full">
+        {loading ? 'Creating...' : 'Create Sale'}
+      </Button>
+    </form>
   );
 };
 

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Sale, SaleProduct } from '@/types/sales';
@@ -37,6 +36,31 @@ export const useSales = () => {
       return data;
     } catch (err) {
       console.error('Error fetching active sale:', err);
+      return null;
+    }
+  };
+
+  const getSaleWithTheme = async (saleId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('sales')
+        .select(`
+          *,
+          themes (
+            id,
+            name,
+            background_color,
+            accent_color,
+            header_image_url
+          )
+        `)
+        .eq('id', saleId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      console.error('Error fetching sale with theme:', err);
       return null;
     }
   };
@@ -111,6 +135,7 @@ export const useSales = () => {
     error,
     fetchSales,
     getActiveSale,
+    getSaleWithTheme,
     createSale,
     updateSale,
     activateSale

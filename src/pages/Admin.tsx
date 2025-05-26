@@ -3,12 +3,13 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Calendar, Settings, FileImage } from 'lucide-react';
+import { Plus, Calendar, Settings, FileImage, Palette } from 'lucide-react';
 import { useSales } from '@/hooks/useSales';
 import SalesList from '@/components/admin/SalesList';
 import CreateSaleForm from '@/components/admin/CreateSaleForm';
 import ProductManager from '@/components/admin/ProductManager';
 import FlyerGenerator from '@/components/FlyerGenerator';
+import ThemeManager from '@/components/admin/ThemeManager';
 
 const Admin = () => {
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
@@ -28,7 +29,7 @@ const Admin = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="sales" className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               Sales
@@ -40,6 +41,10 @@ const Admin = () => {
             <TabsTrigger value="flyer" className="flex items-center gap-2">
               <FileImage className="w-4 h-4" />
               Flyer Preview
+            </TabsTrigger>
+            <TabsTrigger value="themes" className="flex items-center gap-2">
+              <Palette className="w-4 h-4" />
+              Themes
             </TabsTrigger>
             <TabsTrigger value="create" className="flex items-center gap-2">
               <Plus className="w-4 h-4" />
@@ -91,6 +96,17 @@ const Admin = () => {
                     Please select a sale from the Sales tab to preview the flyer
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="themes">
+            <Card>
+              <CardHeader>
+                <CardTitle>Theme Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ThemeManager />
               </CardContent>
             </Card>
           </TabsContent>

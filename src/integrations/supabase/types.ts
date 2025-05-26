@@ -104,6 +104,7 @@ export type Database = {
           name: string
           start_date: string
           theme: Database["public"]["Enums"]["sale_theme"]
+          theme_id: string | null
           updated_at: string
         }
         Insert: {
@@ -117,6 +118,7 @@ export type Database = {
           name: string
           start_date: string
           theme?: Database["public"]["Enums"]["sale_theme"]
+          theme_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -130,6 +132,45 @@ export type Database = {
           name?: string
           start_date?: string
           theme?: Database["public"]["Enums"]["sale_theme"]
+          theme_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "themes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      themes: {
+        Row: {
+          accent_color: string
+          background_color: string
+          created_at: string
+          header_image_url: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          accent_color: string
+          background_color: string
+          created_at?: string
+          header_image_url?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string
+          background_color?: string
+          created_at?: string
+          header_image_url?: string | null
+          id?: string
+          name?: string
           updated_at?: string
         }
         Relationships: []

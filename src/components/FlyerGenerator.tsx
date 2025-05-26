@@ -1,9 +1,11 @@
-import React, { useRef, useState } from 'react';
+
+import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Download, Printer } from 'lucide-react';
 import { useSales, useSaleProducts } from '@/hooks/useSales';
-import { Sale, SaleProduct, THEME_COLORS } from '@/types/sales';
+import { useThemes } from '@/hooks/useThemes';
+import { Sale, SaleProduct, Theme } from '@/types/sales';
 import { format } from 'date-fns';
 
 interface FlyerGeneratorProps {
@@ -13,16 +15,36 @@ interface FlyerGeneratorProps {
 const FlyerGenerator: React.FC<FlyerGeneratorProps> = ({ saleId }) => {
   const { sales } = useSales();
   const { products } = useSaleProducts(saleId);
+  const { getThemeById } = useThemes();
   const flyerRef = useRef<HTMLDivElement>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState<Theme | null>(null);
 
   const sale = sales.find(s => s.id === saleId);
+
+  useEffect(() => {
+    const loadTheme = async () => {
+      if (sale?.theme_id) {
+        const theme = await getThemeById(sale.theme_id);
+        setCurrentTheme(theme);
+      }
+    };
+    loadTheme();
+  }, [sale?.theme_id, getThemeById]);
 
   if (!sale) {
     return <div>Sale not found</div>;
   }
 
-  const themeColors = THEME_COLORS[sale.theme];
+  // Use theme colors if available, fallback to sale colors
+  const themeColors = currentTheme ? {
+    background: currentTheme.background_color,
+    accent: currentTheme.accent_color
+  } : {
+    background: sale.background_color,
+    accent: sale.accent_color
+  };
+
   const productsPerPage = 20; // 5 columns x 4 rows
   const pages = Math.ceil(products.length / productsPerPage);
 
@@ -55,7 +77,7 @@ const FlyerGenerator: React.FC<FlyerGeneratorProps> = ({ saleId }) => {
           {product.badge_text && (
             <div 
               className="absolute top-2 right-2 px-2 py-1 text-xs font-bold text-white rounded"
-              style={{ backgroundColor: sale.accent_color }}
+              style={{ backgroundColor: themeColors.accent }}
             >
               {product.badge_text}
             </div>
@@ -91,7 +113,7 @@ const FlyerGenerator: React.FC<FlyerGeneratorProps> = ({ saleId }) => {
             </p>
             <div 
               className="text-white font-bold text-lg px-2 py-1 rounded"
-              style={{ backgroundColor: sale.background_color }}
+              style={{ backgroundColor: themeColors.background }}
             >
               ${product.sale_price.toFixed(2)}
             </div>
@@ -119,14 +141,30 @@ const FlyerGenerator: React.FC<FlyerGeneratorProps> = ({ saleId }) => {
       >
         {/* Header */}
         <div 
-          className="text-center py-8 text-white"
-          style={{ backgroundColor: sale.background_color }}
+          className="text-center py-8 text-white relative"
+          style={{ backgroundColor: themeColors.background }}
         >
-          <h1 className="text-4xl font-bold mb-2">MY LIQUOR</h1>
-          <h2 className="text-2xl font-semibold mb-2">{sale.name}</h2>
-          <p className="text-lg">
-            {format(new Date(sale.start_date), 'MMMM do')} - {format(new Date(sale.end_date), 'MMMM do, yyyy')}
-          </p>
+          {/* Theme Header Image */}
+          {currentTheme?.header_image_url && (
+            <div className="absolute inset-0 opacity-20">
+              <img
+                src={currentTheme.header_image_url}
+                alt={`${currentTheme.name} header`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+          
+          <div className="relative z-10">
+            <h1 className="text-4xl font-bold mb-2">MY LIQUOR</h1>
+            <h2 className="text-2xl font-semibold mb-2">{sale.name}</h2>
+            <p className="text-lg">
+              {format(new Date(sale.start_date), 'MMMM do')} - {format(new Date(sale.end_date), 'MMMM do, yyyy')}
+            </p>
+            {currentTheme && (
+              <p className="text-sm mt-2 opacity-80">{currentTheme.name} Theme</p>
+            )}
+          </div>
         </div>
 
         {/* Products Grid */}
@@ -137,7 +175,7 @@ const FlyerGenerator: React.FC<FlyerGeneratorProps> = ({ saleId }) => {
         {/* Footer */}
         <div 
           className="text-center py-6 text-white"
-          style={{ backgroundColor: sale.accent_color }}
+          style={{ backgroundColor: themeColors.accent }}
         >
           <div className="max-w-4xl mx-auto px-4">
             <h3 className="text-xl font-bold mb-4">WE MATCH ALL DRAYTON VALLEY COMPETITOR FLYER PRICES</h3>
@@ -176,7 +214,12 @@ const FlyerGenerator: React.FC<FlyerGeneratorProps> = ({ saleId }) => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Flyer Preview - {sale.name}</h3>
+        <div>
+          <h3 className="text-lg font-semibold">Flyer Preview - {sale.name}</h3>
+          {currentTheme && (
+            <p className="text-sm text-gray-600 mt-1">Using {currentTheme.name} theme</p>
+          )}
+        </div>
         <div className="flex gap-2">
           <Button 
             variant="outline" 

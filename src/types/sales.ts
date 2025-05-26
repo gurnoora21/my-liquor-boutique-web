@@ -12,6 +12,7 @@ export interface Sale {
   header_image?: string;
   background_color: string;
   accent_color: string;
+  theme_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -27,6 +28,16 @@ export interface SaleProduct {
   category: ProductCategory;
   badge_text?: string;
   position: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Theme {
+  id: string;
+  name: string;
+  background_color: string;
+  accent_color: string;
+  header_image_url?: string;
   created_at: string;
   updated_at: string;
 }
