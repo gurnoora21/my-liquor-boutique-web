@@ -7,6 +7,8 @@ import { useSales, useSaleProducts } from '@/hooks/useSales';
 import { useThemes } from '@/hooks/useThemes';
 import { Sale, SaleProduct, Theme } from '@/types/sales';
 import { format } from 'date-fns';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface FlyerGeneratorProps {
   saleId: string;
@@ -49,16 +51,69 @@ const FlyerGenerator: React.FC<FlyerGeneratorProps> = ({ saleId }) => {
   const pages = Math.ceil(products.length / productsPerPage);
 
   const generatePDF = async () => {
+    if (!flyerRef.current) return;
+    
     setIsGenerating(true);
     try {
-      // This would integrate with a PDF generation library like jsPDF or html2canvas
-      // For now, we'll open print dialog
-      window.print();
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+        compress: true
+      });
+
+      // Remove existing PDF if any pages were added
+      pdf.deletePage(1);
+
+      for (let pageIndex = 0; pageIndex < pages; pageIndex++) {
+        const pageElement = flyerRef.current.children[pageIndex] as HTMLElement;
+        if (!pageElement) continue;
+
+        // Capture the page as canvas with high resolution
+        const canvas = await html2canvas(pageElement, {
+          scale: 2, // Higher resolution
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          width: pageElement.scrollWidth,
+          height: pageElement.scrollHeight,
+          onclone: (clonedDoc) => {
+            // Ensure proper styling in cloned document
+            const clonedElement = clonedDoc.querySelector('[data-page]') as HTMLElement;
+            if (clonedElement) {
+              clonedElement.style.width = '210mm';
+              clonedElement.style.minHeight = '297mm';
+            }
+          }
+        });
+
+        // Calculate dimensions to fit A4
+        const imgWidth = 210; // A4 width in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        // Add new page
+        pdf.addPage();
+        
+        // Add image to PDF
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+      }
+
+      // Save the PDF
+      const fileName = `${sale.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_flyer.pdf`;
+      pdf.save(fileName);
+      
     } catch (error) {
       console.error('Error generating PDF:', error);
+      // Fallback to print dialog
+      window.print();
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const printFlyer = () => {
+    window.print();
   };
 
   const calculateSavings = (original: number, sale: number) => {
@@ -90,6 +145,7 @@ const FlyerGenerator: React.FC<FlyerGeneratorProps> = ({ saleId }) => {
                 src={product.product_image}
                 alt={product.product_name}
                 className="max-w-full max-h-full object-contain"
+                crossOrigin="anonymous"
               />
             ) : (
               <div className="text-gray-400 text-xs">No Image</div>
@@ -136,8 +192,13 @@ const FlyerGenerator: React.FC<FlyerGeneratorProps> = ({ saleId }) => {
     return (
       <div 
         key={pageIndex}
-        className="w-full min-h-screen bg-white flex flex-col"
-        style={{ pageBreakAfter: pageIndex < pages - 1 ? 'always' : 'auto' }}
+        data-page={pageIndex}
+        className="w-full bg-white flex flex-col"
+        style={{ 
+          minHeight: '297mm',
+          width: '210mm',
+          pageBreakAfter: pageIndex < pages - 1 ? 'always' : 'auto'
+        }}
       >
         {/* Header */}
         <div 
@@ -151,6 +212,7 @@ const FlyerGenerator: React.FC<FlyerGeneratorProps> = ({ saleId }) => {
                 src={currentTheme.header_image_url}
                 alt={`${currentTheme.name} header`}
                 className="w-full h-full object-cover"
+                crossOrigin="anonymous"
               />
             </div>
           )}
@@ -223,18 +285,18 @@ const FlyerGenerator: React.FC<FlyerGeneratorProps> = ({ saleId }) => {
         <div className="flex gap-2">
           <Button 
             variant="outline" 
-            onClick={generatePDF}
+            onClick={printFlyer}
             disabled={isGenerating}
           >
             <Printer className="w-4 h-4 mr-2" />
-            {isGenerating ? 'Generating...' : 'Print'}
+            Print
           </Button>
           <Button 
             onClick={generatePDF}
             disabled={isGenerating}
           >
             <Download className="w-4 h-4 mr-2" />
-            Export PDF
+            {isGenerating ? 'Generating PDF...' : 'Export High-Res PDF'}
           </Button>
         </div>
       </div>
@@ -258,7 +320,7 @@ const FlyerGenerator: React.FC<FlyerGeneratorProps> = ({ saleId }) => {
         {`
           @media print {
             .flyer-content {
-              width: 8.5in;
+              width: 210mm;
               margin: 0;
             }
             
@@ -274,6 +336,14 @@ const FlyerGenerator: React.FC<FlyerGeneratorProps> = ({ saleId }) => {
               position: absolute;
               left: 0;
               top: 0;
+            }
+            
+            [data-page] {
+              page-break-after: always;
+            }
+            
+            [data-page]:last-child {
+              page-break-after: auto;
             }
           }
         `}
