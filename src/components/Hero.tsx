@@ -57,9 +57,12 @@ const Hero = () => {
           <h1 className="text-4xl md:text-6xl font-heading font-bold mb-6 text-white leading-tight">
             Your Local Liquor Store
           </h1>
-          <h2 className="text-xl md:text-2xl font-body mb-8 text-gray-300 leading-relaxed">
-            Serving Buffalo Run & Drayton Valley Since 2015
+          <h2 className="text-xl md:text-2xl font-body mb-4 text-gray-300 leading-relaxed">
+            Alberta's Trusted Liquor Retailer Since 2021
           </h2>
+          <p className="text-lg font-body mb-8 text-gray-400">
+            Multiple Locations Across Alberta
+          </p>
           
           {/* Rotating Taglines */}
           <div className="h-8 mb-12">
@@ -69,7 +72,7 @@ const Hero = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.5 }}
-              className="text-lg text-warm-gold font-medium"
+              className="text-lg text-amber-500 font-medium"
             >
               {taglines[currentTagline]}
             </motion.p>
@@ -77,7 +80,7 @@ const Hero = () => {
           
           <Button 
             size="lg" 
-            className="bg-warm-gold text-charcoal hover:bg-warm-gold/90 font-semibold px-8 py-4 text-lg transition-all duration-300 mb-8 group overflow-hidden relative"
+            className="bg-amber-500 text-white hover:bg-amber-600 font-semibold px-8 py-4 text-lg transition-all duration-300 mb-8 group overflow-hidden relative shadow-lg hover:shadow-xl"
           >
             <span className="relative z-10">Shop Our Specials</span>
             <div className="absolute inset-0 bg-white transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out"></div>

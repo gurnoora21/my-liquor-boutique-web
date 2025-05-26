@@ -113,29 +113,29 @@ const WeeklySpecials = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-heading font-bold text-white mb-8" style={{ lineHeight: '1.32' }}>
-              This Week's <span className="text-warm-gold">Deals</span>
+              This Week's <span className="text-amber-500">Deals</span>
             </h2>
-            <div className="w-24 h-0.5 bg-warm-gold mx-auto mb-8"></div>
+            <div className="w-24 h-0.5 bg-amber-500 mx-auto mb-8"></div>
             
             {/* Countdown Timer */}
-            <div className="bg-charcoal p-6 rounded-lg border border-warm-gold/30 inline-block mb-8">
+            <div className="bg-charcoal p-6 rounded-lg border border-amber-500/30 inline-block mb-8 shadow-card">
               <div className="flex items-center justify-center text-white mb-2">
-                <Clock className="w-5 h-5 text-warm-gold mr-2" />
+                <Clock className="w-5 h-5 text-amber-500 mr-2" />
                 <span className="text-sm font-medium">Deals end in:</span>
               </div>
               <div className="flex space-x-4 text-center">
                 <div>
-                  <div className="text-2xl font-bold text-warm-gold">{timeLeft.days}</div>
+                  <div className="text-2xl font-bold text-amber-500">{timeLeft.days}</div>
                   <div className="text-xs text-gray-400">DAYS</div>
                 </div>
-                <div className="text-warm-gold">:</div>
+                <div className="text-amber-500">:</div>
                 <div>
-                  <div className="text-2xl font-bold text-warm-gold">{timeLeft.hours}</div>
+                  <div className="text-2xl font-bold text-amber-500">{timeLeft.hours}</div>
                   <div className="text-xs text-gray-400">HOURS</div>
                 </div>
-                <div className="text-warm-gold">:</div>
+                <div className="text-amber-500">:</div>
                 <div>
-                  <div className="text-2xl font-bold text-warm-gold">{timeLeft.minutes}</div>
+                  <div className="text-2xl font-bold text-amber-500">{timeLeft.minutes}</div>
                   <div className="text-xs text-gray-400">MINS</div>
                 </div>
               </div>
@@ -152,10 +152,10 @@ const WeeklySpecials = () => {
               <motion.div 
                 key={index}
                 variants={cardVariants}
-                className="bg-charcoal p-6 rounded-lg border border-gray-700 hover:border-warm-gold/50 transition-all duration-300 group hover:-translate-y-2 hover:shadow-xl relative overflow-hidden"
+                className="bg-charcoal p-6 rounded-lg border border-gray-700 hover:border-amber-500/50 transition-all duration-300 group hover:-translate-y-2 shadow-card hover:shadow-card-hover relative overflow-hidden"
               >
                 {/* Savings Badge */}
-                <div className="absolute top-4 right-4 bg-warm-gold text-charcoal px-2 py-1 rounded text-sm font-bold">
+                <div className="absolute top-4 right-4 bg-sale-red text-white px-2 py-1 rounded text-sm font-bold">
                   Save {special.savings}
                 </div>
 
@@ -168,7 +168,7 @@ const WeeklySpecials = () => {
                     />
                   </div>
                   
-                  <h3 className="text-lg font-heading font-semibold text-white mb-3 group-hover:text-warm-gold transition-colors">
+                  <h3 className="text-lg font-heading font-semibold text-white mb-3 group-hover:text-amber-500 transition-colors">
                     {special.name}
                   </h3>
                   
@@ -176,7 +176,7 @@ const WeeklySpecials = () => {
                     <div className="text-gray-400 text-sm line-through">
                       {special.originalPrice}
                     </div>
-                    <div className="text-2xl font-bold text-warm-gold">
+                    <div className="text-2xl font-bold text-amber-500">
                       {special.salePrice}
                     </div>
                   </div>
@@ -186,7 +186,7 @@ const WeeklySpecials = () => {
                 <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
                   <Button 
                     size="sm"
-                    className="w-full bg-warm-gold hover:bg-warm-gold/90 text-charcoal font-semibold"
+                    className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold shadow-lg hover:shadow-xl"
                   >
                     Add to List
                   </Button>
@@ -200,7 +200,7 @@ const WeeklySpecials = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button 
                 size="lg"
-                className="bg-warm-gold hover:bg-warm-gold/90 text-charcoal font-semibold px-8 py-3 transition-all duration-300 group overflow-hidden relative"
+                className="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-8 py-3 transition-all duration-300 group overflow-hidden relative shadow-lg hover:shadow-xl"
               >
                 <span className="relative z-10 flex items-center">
                   View All Specials
@@ -211,7 +211,7 @@ const WeeklySpecials = () => {
               <Button 
                 variant="outline"
                 size="lg"
-                className="border-warm-gold text-warm-gold hover:bg-warm-gold hover:text-charcoal px-8 py-3 transition-all duration-300"
+                className="border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-white px-8 py-3 transition-all duration-300 shadow-lg hover:shadow-xl"
               >
                 <Printer className="w-4 h-4 mr-2" />
                 Print Flyer

@@ -24,11 +24,12 @@ export default {
 				'body': ['Inter', 'sans-serif'],
 			},
 			colors: {
-				// Custom color palette
+				// Updated color palette
 				'charcoal': '#1A1A1A',
-				'warm-gold': '#D4AF37',
-				'dark-bg': '#0A0A0A',
+				'warm-gold': '#F59E0B', // Changed to amber
+				'dark-bg': '#0F0F0F', // Warmer dark
 				'light-bg': '#FAFAFA',
+				'sale-red': '#7F1D1D', // Deep red for sales
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
@@ -77,6 +78,10 @@ export default {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			boxShadow: {
+				'card': '0 4px 6px -1px rgba(0, 0, 0, 0.3)',
+				'card-hover': '0 10px 15px -3px rgba(0, 0, 0, 0.4)',
 			},
 			keyframes: {
 				'accordion-down': {
