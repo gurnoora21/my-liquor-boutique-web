@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Upload, Edit, Trash2, GripVertical } from 'lucide-react';
+import { Plus, Upload, Edit, Trash2, GripVertical, Percent } from 'lucide-react';
 import { useSaleProducts } from '@/hooks/useSales';
 import ProductForm from './ProductForm';
 import { SaleProduct } from '@/types/sales';
@@ -41,7 +41,10 @@ const ProductManager: React.FC<ProductManagerProps> = ({ saleId }) => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Products ({products.length})</h3>
+        <div>
+          <h3 className="text-lg font-semibold">Products ({products.length})</h3>
+          <p className="text-sm text-gray-500">Manage products for this sale</p>
+        </div>
         <div className="flex gap-2">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -50,7 +53,7 @@ const ProductManager: React.FC<ProductManagerProps> = ({ saleId }) => {
                 Add Product
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {editingProduct ? 'Edit Product' : 'Add New Product'}
@@ -77,6 +80,7 @@ const ProductManager: React.FC<ProductManagerProps> = ({ saleId }) => {
         <Card>
           <CardContent className="py-8">
             <div className="text-center text-gray-500">
+              <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
               <p className="mb-4">No products added yet</p>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
@@ -85,7 +89,7 @@ const ProductManager: React.FC<ProductManagerProps> = ({ saleId }) => {
                     Add Your First Product
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Add New Product</DialogTitle>
                   </DialogHeader>
@@ -126,7 +130,7 @@ const ProductManager: React.FC<ProductManagerProps> = ({ saleId }) => {
                           <img
                             src={product.product_image}
                             alt={product.product_name}
-                            className="w-12 h-12 object-cover rounded"
+                            className="w-12 h-12 object-cover rounded border"
                           />
                         )}
                         <div>
@@ -157,9 +161,10 @@ const ProductManager: React.FC<ProductManagerProps> = ({ saleId }) => {
                         <p className="text-sm font-medium text-red-600">
                           Save ${calculateSavings(product.original_price, product.sale_price)}
                         </p>
-                        <p className="text-xs text-gray-500">
-                          ({calculateSavingsPercent(product.original_price, product.sale_price)}% off)
-                        </p>
+                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                          <Percent className="w-3 h-3" />
+                          {calculateSavingsPercent(product.original_price, product.sale_price)}% off
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
