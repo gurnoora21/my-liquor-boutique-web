@@ -7,16 +7,16 @@ import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { ArrowRight, Clock, Printer } from "@phosphor-icons/react";
-import { useSales, useSaleProducts } from '@/hooks/useSales';
+import { useSalesRealtime, useSaleProductsRealtime } from '@/hooks/useSalesRealtime';
 import { SaleProduct } from '@/types/sales';
 
 const WeeklySpecials = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
-  const { getActiveSale } = useSales();
+  const { getActiveSale } = useSalesRealtime();
   const [activeSale, setActiveSale] = useState(null);
   const [saleId, setSaleId] = useState<string | null>(null);
-  const { products } = useSaleProducts(saleId);
+  const { products } = useSaleProductsRealtime(saleId);
   
   const [timeLeft, setTimeLeft] = useState({
     days: 3,

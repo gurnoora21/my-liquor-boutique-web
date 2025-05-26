@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Calendar, Settings, FileImage, Palette } from 'lucide-react';
-import { useSales } from '@/hooks/useSales';
+import { useSalesRealtime } from '@/hooks/useSalesRealtime';
 import SalesList from '@/components/admin/SalesList';
 import CreateSaleForm from '@/components/admin/CreateSaleForm';
 import ProductManager from '@/components/admin/ProductManager';
@@ -14,7 +14,7 @@ import ThemeManager from '@/components/admin/ThemeManager';
 const Admin = () => {
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('sales');
-  const { sales } = useSales();
+  const { sales } = useSalesRealtime();
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">

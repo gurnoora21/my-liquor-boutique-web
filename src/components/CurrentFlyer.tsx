@@ -4,14 +4,14 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import AnimatedSection from './AnimatedSection';
-import { useSales, useSaleProducts } from '@/hooks/useSales';
+import { useSalesRealtime, useSaleProductsRealtime } from '@/hooks/useSalesRealtime';
 import FlyerGenerator from './FlyerGenerator';
 
 const CurrentFlyer = () => {
-  const { getActiveSale } = useSales();
+  const { getActiveSale } = useSalesRealtime();
   const [activeSale, setActiveSale] = useState(null);
   const [saleId, setSaleId] = useState<string | null>(null);
-  const { products } = useSaleProducts(saleId);
+  const { products } = useSaleProductsRealtime(saleId);
   const [currentFlyer, setCurrentFlyer] = useState(0);
   
   // Fallback flyers for when no active sale exists
