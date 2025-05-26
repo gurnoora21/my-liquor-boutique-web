@@ -2,13 +2,20 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AnimatedSection from './AnimatedSection';
+import { useSales, useSaleProducts } from '@/hooks/useSales';
+import FlyerGenerator from './FlyerGenerator';
 
 const CurrentFlyer = () => {
+  const { getActiveSale } = useSales();
+  const [activeSale, setActiveSale] = useState(null);
+  const [saleId, setSaleId] = useState<string | null>(null);
+  const { products } = useSaleProducts(saleId);
   const [currentFlyer, setCurrentFlyer] = useState(0);
   
-  const flyers = [
+  // Fallback flyers for when no active sale exists
+  const fallbackFlyers = [
     {
       src: "/FLYER - Hallowen Sale 1.jpg",
       alt: "Halloween Sale Flyer - Page 1"
@@ -19,18 +26,61 @@ const CurrentFlyer = () => {
     }
   ];
 
+  useEffect(() => {
+    const fetchActiveSale = async () => {
+      const sale = await getActiveSale();
+      if (sale) {
+        setActiveSale(sale);
+        setSaleId(sale.id);
+      }
+    };
+
+    fetchActiveSale();
+  }, [getActiveSale]);
+
   const nextFlyer = () => {
-    setCurrentFlyer((prev) => (prev + 1) % flyers.length);
+    setCurrentFlyer((prev) => (prev + 1) % fallbackFlyers.length);
   };
 
   const prevFlyer = () => {
-    setCurrentFlyer((prev) => (prev - 1 + flyers.length) % flyers.length);
+    setCurrentFlyer((prev) => (prev - 1 + fallbackFlyers.length) % fallbackFlyers.length);
   };
 
+  // Show generated flyer if active sale exists with products
+  if (activeSale && products.length > 0) {
+    return (
+      <AnimatedSection>
+        <section id="flyer" className="py-40 bg-dark-bg relative overflow-hidden">
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-px bg-warm-gold/30"></div>
+          
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="text-center mb-24">
+              <h2 className="text-4xl md:text-5xl font-heading font-bold text-white mb-8" style={{ lineHeight: '1.32' }}>
+                Current <span style={{ color: activeSale.background_color }}>Sale</span>
+              </h2>
+              <div className="w-24 h-0.5 mx-auto mb-8" style={{ backgroundColor: activeSale.background_color }}></div>
+              <p className="text-xl text-gray-300 font-body" style={{ lineHeight: '1.8' }}>
+                {activeSale.name} - Live Now
+              </p>
+            </div>
+
+            <div className="max-w-6xl mx-auto">
+              <div className="bg-charcoal p-8 rounded-lg border border-gray-700 hover:border-gray-500 transition-all duration-300" style={{ borderColor: `${activeSale.background_color}30` }}>
+                <FlyerGenerator saleId={saleId} />
+              </div>
+            </div>
+            
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-px bg-warm-gold/30"></div>
+          </div>
+        </section>
+      </AnimatedSection>
+    );
+  }
+
+  // Fallback to existing static flyers
   return (
     <AnimatedSection>
       <section id="flyer" className="py-40 bg-dark-bg relative overflow-hidden">
-        {/* Subtle horizontal divider */}
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-24 h-px bg-warm-gold/30"></div>
         
         <div className="container mx-auto px-4 relative z-10">
@@ -49,13 +99,12 @@ const CurrentFlyer = () => {
               <div className="text-center mb-8">
                 <div className="relative w-full h-96 bg-gray-800 rounded-lg flex items-center justify-center mb-8 border border-gray-600 overflow-hidden">
                   <img
-                    src={flyers[currentFlyer].src}
-                    alt={flyers[currentFlyer].alt}
+                    src={fallbackFlyers[currentFlyer].src}
+                    alt={fallbackFlyers[currentFlyer].alt}
                     className="w-full h-full object-contain"
                   />
                   
-                  {/* Navigation buttons */}
-                  {flyers.length > 1 && (
+                  {fallbackFlyers.length > 1 && (
                     <>
                       <button
                         onClick={prevFlyer}
@@ -73,10 +122,9 @@ const CurrentFlyer = () => {
                   )}
                 </div>
 
-                {/* Page indicators */}
-                {flyers.length > 1 && (
+                {fallbackFlyers.length > 1 && (
                   <div className="flex justify-center space-x-2 mb-6">
-                    {flyers.map((_, index) => (
+                    {fallbackFlyers.map((_, index) => (
                       <button
                         key={index}
                         onClick={() => setCurrentFlyer(index)}
@@ -107,7 +155,6 @@ const CurrentFlyer = () => {
             </div>
           </div>
           
-          {/* Subtle horizontal divider */}
           <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-px bg-warm-gold/30"></div>
         </div>
       </section>

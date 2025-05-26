@@ -9,7 +9,131 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      flyer_templates: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean
+          layout_config: Json
+          name: string
+          theme: Database["public"]["Enums"]["sale_theme"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          layout_config?: Json
+          name: string
+          theme: Database["public"]["Enums"]["sale_theme"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          layout_config?: Json
+          name?: string
+          theme?: Database["public"]["Enums"]["sale_theme"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sale_products: {
+        Row: {
+          badge_text: string | null
+          category: Database["public"]["Enums"]["product_category"]
+          created_at: string
+          id: string
+          original_price: number
+          position: number
+          product_image: string | null
+          product_name: string
+          sale_id: string
+          sale_price: number
+          size: string | null
+          updated_at: string
+        }
+        Insert: {
+          badge_text?: string | null
+          category?: Database["public"]["Enums"]["product_category"]
+          created_at?: string
+          id?: string
+          original_price: number
+          position?: number
+          product_image?: string | null
+          product_name: string
+          sale_id: string
+          sale_price: number
+          size?: string | null
+          updated_at?: string
+        }
+        Update: {
+          badge_text?: string | null
+          category?: Database["public"]["Enums"]["product_category"]
+          created_at?: string
+          id?: string
+          original_price?: number
+          position?: number
+          product_image?: string | null
+          product_name?: string
+          sale_id?: string
+          sale_price?: number
+          size?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_products_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales: {
+        Row: {
+          accent_color: string
+          background_color: string
+          created_at: string
+          end_date: string
+          header_image: string | null
+          id: string
+          is_active: boolean
+          name: string
+          start_date: string
+          theme: Database["public"]["Enums"]["sale_theme"]
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string
+          background_color?: string
+          created_at?: string
+          end_date: string
+          header_image?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          start_date: string
+          theme?: Database["public"]["Enums"]["sale_theme"]
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string
+          background_color?: string
+          created_at?: string
+          end_date?: string
+          header_image?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          start_date?: string
+          theme?: Database["public"]["Enums"]["sale_theme"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +142,19 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      product_category:
+        | "spirits"
+        | "wine"
+        | "beer"
+        | "coolers"
+        | "mixers"
+        | "accessories"
+      sale_theme:
+        | "easter"
+        | "halloween"
+        | "victoria-day"
+        | "christmas"
+        | "general"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +269,22 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      product_category: [
+        "spirits",
+        "wine",
+        "beer",
+        "coolers",
+        "mixers",
+        "accessories",
+      ],
+      sale_theme: [
+        "easter",
+        "halloween",
+        "victoria-day",
+        "christmas",
+        "general",
+      ],
+    },
   },
 } as const
