@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -212,28 +211,30 @@ const FlyerGenerator: React.FC<FlyerGeneratorProps> = ({ saleId }) => {
         </div>
       )}
 
-      <style jsx>{`
-        @media print {
-          .flyer-content {
-            width: 8.5in;
-            margin: 0;
+      <style>
+        {`
+          @media print {
+            .flyer-content {
+              width: 8.5in;
+              margin: 0;
+            }
+            
+            body * {
+              visibility: hidden;
+            }
+            
+            .flyer-content, .flyer-content * {
+              visibility: visible;
+            }
+            
+            .flyer-content {
+              position: absolute;
+              left: 0;
+              top: 0;
+            }
           }
-          
-          body * {
-            visibility: hidden;
-          }
-          
-          .flyer-content, .flyer-content * {
-            visibility: visible;
-          }
-          
-          .flyer-content {
-            position: absolute;
-            left: 0;
-            top: 0;
-          }
-        }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };
