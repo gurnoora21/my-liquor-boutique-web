@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
@@ -7,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Upload, Crop as CropIcon, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Upload, Crop as CropIcon, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react';
 import { useOptimisticSaleProducts } from '@/hooks/useOptimisticSales';
 import { usePriceValidation } from '@/hooks/usePriceValidation';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,6 +34,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
   const { addProduct, updateProduct } = useOptimisticSaleProducts(saleId);
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [imageUrl, setImageUrl] = useState(product?.product_image || '');
   const [showCropModal, setShowCropModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -172,58 +172,59 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
 
   const onSubmit = async (data: FormData) => {
     console.log('Form submitted with data:', data);
-
-    // Validate prices
-    const originalPrice = parseFloat(data.original_price);
-    const salePrice = parseFloat(data.sale_price);
-
-    if (isNaN(originalPrice) || originalPrice <= 0) {
-      form.setError('original_price', {
-        type: 'manual',
-        message: 'Please enter a valid original price'
-      });
-      toast({
-        title: "Validation Error",
-        description: "Please enter a valid original price",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (isNaN(salePrice) || salePrice <= 0) {
-      form.setError('sale_price', {
-        type: 'manual',
-        message: 'Please enter a valid sale price'
-      });
-      toast({
-        title: "Validation Error",
-        description: "Please enter a valid sale price",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!priceValidation.isValid) {
-      form.setError('sale_price', {
-        type: 'manual',
-        message: priceValidation.error || 'Invalid pricing'
-      });
-      toast({
-        title: "Pricing Error",
-        description: priceValidation.error || 'Invalid pricing',
-        variant: "destructive"
-      });
-      return;
-    }
+    setSubmitting(true);
 
     try {
+      // Validate prices
+      const originalPrice = parseFloat(data.original_price);
+      const salePrice = parseFloat(data.sale_price);
+
+      if (isNaN(originalPrice) || originalPrice <= 0) {
+        form.setError('original_price', {
+          type: 'manual',
+          message: 'Please enter a valid original price'
+        });
+        toast({
+          title: "Validation Error",
+          description: "Please enter a valid original price",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (isNaN(salePrice) || salePrice <= 0) {
+        form.setError('sale_price', {
+          type: 'manual',
+          message: 'Please enter a valid sale price'
+        });
+        toast({
+          title: "Validation Error",
+          description: "Please enter a valid sale price",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!priceValidation.isValid) {
+        form.setError('sale_price', {
+          type: 'manual',
+          message: priceValidation.error || 'Invalid pricing'
+        });
+        toast({
+          title: "Pricing Error",
+          description: priceValidation.error || 'Invalid pricing',
+          variant: "destructive"
+        });
+        return;
+      }
+
       const productData = {
         product_name: data.product_name.trim(),
         category: data.category,
         original_price: originalPrice,
         sale_price: salePrice,
         size: data.size?.trim() || null,
-        badge_text: data.badge_text?.trim() || null, // Only save badge if not empty
+        badge_text: data.badge_text?.trim() || null,
         sale_id: saleId,
         product_image: imageUrl || null,
         position: product?.position || 0,
@@ -232,33 +233,36 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
       console.log('Submitting product data:', productData);
 
       if (product) {
+        console.log('Updating existing product:', product.id);
         await updateProduct(product.id, productData);
-        toast({
-          title: "Success",
-          description: "Product updated successfully",
-        });
       } else {
+        console.log('Adding new product');
         await addProduct(productData);
-        toast({
-          title: "Success",
-          description: "Product added successfully",
-        });
       }
 
+      console.log('Product operation completed successfully');
       onSuccess();
     } catch (error) {
       console.error('Failed to save product:', error);
       
-      let errorMessage = `Failed to ${product ? 'update' : 'add'} product`;
+      // Error is already handled in the optimistic hook, but we can add form-specific handling here
       if (error instanceof Error) {
-        errorMessage = error.message;
+        if (error.message.includes('required')) {
+          toast({
+            title: "Validation Error",
+            description: "Please fill in all required fields",
+            variant: "destructive"
+          });
+        } else if (error.message.includes('duplicate')) {
+          toast({
+            title: "Duplicate Error",
+            description: "A product with this name already exists",
+            variant: "destructive"
+          });
+        }
       }
-      
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive"
-      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -445,10 +449,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button type="button" variant="outline" onClick={onCancel} disabled={submitting}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!priceValidation.isValid || uploading}>
+            <Button type="submit" disabled={!priceValidation.isValid || uploading || submitting}>
+              {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {product ? 'Update Product' : 'Add Product'}
             </Button>
           </div>
