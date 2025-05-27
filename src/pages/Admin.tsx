@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -14,7 +14,17 @@ import ThemeManager from '@/components/admin/ThemeManager';
 const Admin = () => {
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('sales');
-  const { sales } = useSalesRealtime();
+  const { sales, loading } = useSalesRealtime();
+
+  // Auto-select the first sale or active sale when sales are loaded
+  useEffect(() => {
+    if (!loading && sales.length > 0 && !selectedSaleId) {
+      // Try to find an active sale first, otherwise select the first sale
+      const activeSale = sales.find(sale => sale.is_active);
+      const saleToSelect = activeSale || sales[0];
+      setSelectedSaleId(saleToSelect.id);
+    }
+  }, [sales, loading, selectedSaleId]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -70,13 +80,30 @@ const Admin = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Product Management</CardTitle>
+                {selectedSaleId && (
+                  <p className="text-sm text-gray-600">
+                    Managing products for: {sales.find(s => s.id === selectedSaleId)?.name || 'Selected Sale'}
+                  </p>
+                )}
               </CardHeader>
               <CardContent>
                 {selectedSaleId ? (
                   <ProductManager saleId={selectedSaleId} />
                 ) : (
                   <div className="text-center py-8 text-gray-500">
-                    Please select a sale from the Sales tab to manage products
+                    {loading ? (
+                      <p>Loading sales...</p>
+                    ) : sales.length === 0 ? (
+                      <div>
+                        <p className="mb-4">No sales found. Create a sale first to manage products.</p>
+                        <Button onClick={() => setActiveTab('create')}>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create Your First Sale
+                        </Button>
+                      </div>
+                    ) : (
+                      <p>Please select a sale from the Sales tab to manage products</p>
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -87,13 +114,30 @@ const Admin = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Flyer Preview & Export</CardTitle>
+                {selectedSaleId && (
+                  <p className="text-sm text-gray-600">
+                    Previewing flyer for: {sales.find(s => s.id === selectedSaleId)?.name || 'Selected Sale'}
+                  </p>
+                )}
               </CardHeader>
               <CardContent>
                 {selectedSaleId ? (
                   <FlyerGenerator saleId={selectedSaleId} />
                 ) : (
                   <div className="text-center py-8 text-gray-500">
-                    Please select a sale from the Sales tab to preview the flyer
+                    {loading ? (
+                      <p>Loading sales...</p>
+                    ) : sales.length === 0 ? (
+                      <div>
+                        <p className="mb-4">No sales found. Create a sale first to preview flyers.</p>
+                        <Button onClick={() => setActiveTab('create')}>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create Your First Sale
+                        </Button>
+                      </div>
+                    ) : (
+                      <p>Please select a sale from the Sales tab to preview the flyer</p>
+                    )}
                   </div>
                 )}
               </CardContent>
