@@ -28,6 +28,18 @@ const CreateSaleForm: React.FC<CreateSaleFormProps> = ({ onSuccess }) => {
     accent_color: '#1A1A1A'
   });
 
+  // Helper function to map theme names to enum values
+  const mapThemeNameToEnum = (themeName: string): SaleTheme => {
+    const themeMap: Record<string, SaleTheme> = {
+      'General': 'general',
+      'Easter': 'easter',
+      'Halloween': 'halloween',
+      'Victoria Day': 'victoria-day',
+      'Christmas': 'christmas'
+    };
+    return themeMap[themeName] || 'general';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.start_date || !formData.end_date) {
@@ -39,12 +51,32 @@ const CreateSaleForm: React.FC<CreateSaleFormProps> = ({ onSuccess }) => {
       return;
     }
 
+    if (!formData.theme_id) {
+      toast({
+        title: "Error",
+        description: "Please select a theme",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading(true);
     try {
+      console.log('Creating sale with data:', {
+        name: formData.name,
+        theme: formData.theme,
+        theme_id: formData.theme_id,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
+        background_color: formData.background_color,
+        accent_color: formData.accent_color,
+        is_active: false
+      });
+
       await createSale({
         name: formData.name,
         theme: formData.theme,
-        theme_id: formData.theme_id || null,
+        theme_id: formData.theme_id,
         start_date: formData.start_date,
         end_date: formData.end_date,
         background_color: formData.background_color,
@@ -69,9 +101,10 @@ const CreateSaleForm: React.FC<CreateSaleFormProps> = ({ onSuccess }) => {
 
       onSuccess();
     } catch (error) {
+      console.error('Error creating sale:', error);
       toast({
         title: "Error",
-        description: "Failed to create sale",
+        description: error instanceof Error ? error.message : "Failed to create sale",
         variant: "destructive"
       });
     } finally {
@@ -82,8 +115,20 @@ const CreateSaleForm: React.FC<CreateSaleFormProps> = ({ onSuccess }) => {
   const handleThemeChange = (themeId: string) => {
     const selectedTheme = themes.find(t => t.id === themeId);
     if (selectedTheme) {
+      // Map the theme name to the enum value
+      const themeEnum = mapThemeNameToEnum(selectedTheme.name);
+      
+      console.log('Theme selected:', {
+        themeId,
+        themeName: selectedTheme.name,
+        themeEnum,
+        backgroundColor: selectedTheme.background_color,
+        accentColor: selectedTheme.accent_color
+      });
+
       setFormData({
         ...formData,
+        theme: themeEnum,
         theme_id: themeId,
         background_color: selectedTheme.background_color,
         accent_color: selectedTheme.accent_color
@@ -91,10 +136,20 @@ const CreateSaleForm: React.FC<CreateSaleFormProps> = ({ onSuccess }) => {
     }
   };
 
+  // Set default theme when themes are loaded
+  React.useEffect(() => {
+    if (themes.length > 0 && !formData.theme_id) {
+      const generalTheme = themes.find(t => t.name.toLowerCase() === 'general') || themes[0];
+      if (generalTheme) {
+        handleThemeChange(generalTheme.id);
+      }
+    }
+  }, [themes, formData.theme_id]);
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label htmlFor="name">Sale Name</Label>
+        <Label htmlFor="name">Sale Name *</Label>
         <Input
           id="name"
           type="text"
@@ -106,7 +161,7 @@ const CreateSaleForm: React.FC<CreateSaleFormProps> = ({ onSuccess }) => {
       </div>
 
       <div>
-        <Label htmlFor="theme">Theme</Label>
+        <Label htmlFor="theme">Theme *</Label>
         <Select value={formData.theme_id} onValueChange={handleThemeChange}>
           <SelectTrigger>
             <SelectValue placeholder="Select a theme" />
@@ -129,7 +184,7 @@ const CreateSaleForm: React.FC<CreateSaleFormProps> = ({ onSuccess }) => {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="start_date">Start Date</Label>
+          <Label htmlFor="start_date">Start Date *</Label>
           <Input
             id="start_date"
             type="date"
@@ -139,7 +194,7 @@ const CreateSaleForm: React.FC<CreateSaleFormProps> = ({ onSuccess }) => {
           />
         </div>
         <div>
-          <Label htmlFor="end_date">End Date</Label>
+          <Label htmlFor="end_date">End Date *</Label>
           <Input
             id="end_date"
             type="date"
