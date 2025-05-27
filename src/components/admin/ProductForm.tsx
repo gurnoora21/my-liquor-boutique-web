@@ -140,7 +140,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
         .from('product-images')
         .upload(filePath, croppedBlob, { contentType: 'image/png' });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
 
       const { data } = supabase.storage
         .from('product-images')
@@ -153,7 +156,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
       
       toast({
         title: "Success",
-        description: "Image uploaded successfully",
+        description: "Image uploaded and cropped successfully",
       });
     } catch (error) {
       console.error('Error uploading cropped image:', error);
@@ -168,6 +171,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
   };
 
   const onSubmit = async (data: FormData) => {
+    console.log('Form submitted with data:', data);
+
     // Validate prices
     const originalPrice = parseFloat(data.original_price);
     const salePrice = parseFloat(data.sale_price);
@@ -177,6 +182,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
         type: 'manual',
         message: 'Please enter a valid original price'
       });
+      toast({
+        title: "Validation Error",
+        description: "Please enter a valid original price",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -184,6 +194,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
       form.setError('sale_price', {
         type: 'manual',
         message: 'Please enter a valid sale price'
+      });
+      toast({
+        title: "Validation Error",
+        description: "Please enter a valid sale price",
+        variant: "destructive"
       });
       return;
     }
@@ -193,16 +208,21 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
         type: 'manual',
         message: priceValidation.error || 'Invalid pricing'
       });
+      toast({
+        title: "Pricing Error",
+        description: priceValidation.error || 'Invalid pricing',
+        variant: "destructive"
+      });
       return;
     }
 
     try {
       const productData = {
-        product_name: data.product_name,
+        product_name: data.product_name.trim(),
         category: data.category,
         original_price: originalPrice,
         sale_price: salePrice,
-        size: data.size || null,
+        size: data.size?.trim() || null,
         badge_text: data.badge_text?.trim() || null, // Only save badge if not empty
         sale_id: saleId,
         product_image: imageUrl || null,
@@ -213,21 +233,30 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
 
       if (product) {
         await updateProduct(product.id, productData);
+        toast({
+          title: "Success",
+          description: "Product updated successfully",
+        });
       } else {
         await addProduct(productData);
+        toast({
+          title: "Success",
+          description: "Product added successfully",
+        });
       }
-
-      toast({
-        title: "Success",
-        description: `Product ${product ? 'updated' : 'added'} successfully`,
-      });
 
       onSuccess();
     } catch (error) {
       console.error('Failed to save product:', error);
+      
+      let errorMessage = `Failed to ${product ? 'update' : 'add'} product`;
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : `Failed to ${product ? 'update' : 'add'} product`,
+        description: errorMessage,
         variant: "destructive"
       });
     }
@@ -293,8 +322,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
                       step="0.01" 
                       placeholder="39.99"
                       {...field}
-                      value={field.value || ''}
-                      onChange={(e) => field.onChange(e.target.value)}
+                      onChange={(e) => {
+                        // Allow empty string to clear the field completely
+                        field.onChange(e.target.value);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -316,8 +347,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
                       placeholder="32.99"
                       className={priceValidation.error ? 'border-red-500' : priceValidation.isValid && watchedSalePrice > 0 ? 'border-green-500' : ''}
                       {...field}
-                      value={field.value || ''}
-                      onChange={(e) => field.onChange(e.target.value)}
+                      onChange={(e) => {
+                        // Allow empty string to clear the field completely
+                        field.onChange(e.target.value);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
