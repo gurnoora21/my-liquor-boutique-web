@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { SaleProduct } from '@/types/sales';
 import { useSaleProducts } from './useSales';
@@ -10,20 +11,18 @@ interface PendingOperation {
 }
 
 export const useOptimisticSaleProducts = (saleId: string) => {
-  const { products: serverProducts, addProduct, updateProduct, deleteProduct, reorderProducts } = useSaleProducts(saleId);
+  const { products: serverProducts, addProduct, updateProduct, deleteProduct, reorderProducts, fetchProducts } = useSaleProducts(saleId);
   const [optimisticProducts, setOptimisticProducts] = useState<SaleProduct[]>([]);
   const [pendingOperations, setPendingOperations] = useState<Map<string, PendingOperation>>(new Map());
   const { toast } = useToast();
 
   // Sync with server products when they change
   useEffect(() => {
-    if (serverProducts.length > 0) {
-      setOptimisticProducts(serverProducts);
-    }
+    setOptimisticProducts(serverProducts);
   }, [serverProducts]);
 
-  // Merge server products with optimistic updates
-  const products = optimisticProducts.length > 0 ? optimisticProducts : serverProducts;
+  // Use server products as the source of truth
+  const products = optimisticProducts;
 
   const addOptimisticProduct = useCallback(async (productData: Omit<SaleProduct, 'id' | 'created_at' | 'updated_at'>) => {
     const tempId = `temp-${Date.now()}`;
@@ -45,10 +44,8 @@ export const useOptimisticSaleProducts = (saleId: string) => {
     try {
       const savedProduct = await addProduct(productData);
       
-      // Replace temp product with saved product
-      setOptimisticProducts(prev => 
-        prev.map(p => p.id === tempId ? savedProduct : p)
-      );
+      // Refresh the products list from server to ensure consistency
+      await fetchProducts();
       
       toast({
         title: "Success",
@@ -69,7 +66,7 @@ export const useOptimisticSaleProducts = (saleId: string) => {
         return newMap;
       });
     }
-  }, [addProduct, toast]);
+  }, [addProduct, fetchProducts, toast]);
 
   const updateOptimisticProduct = useCallback(async (id: string, updates: Partial<SaleProduct>) => {
     // Find current product
@@ -91,6 +88,10 @@ export const useOptimisticSaleProducts = (saleId: string) => {
 
     try {
       await updateProduct(id, updates);
+      
+      // Refresh the products list from server to ensure consistency
+      await fetchProducts();
+      
       toast({
         title: "Success",
         description: "Product updated successfully",
@@ -112,7 +113,7 @@ export const useOptimisticSaleProducts = (saleId: string) => {
         return newMap;
       });
     }
-  }, [products, updateProduct, toast]);
+  }, [products, updateProduct, fetchProducts, toast]);
 
   const deleteOptimisticProduct = useCallback(async (id: string) => {
     const productToDelete = products.find(p => p.id === id);
@@ -128,6 +129,10 @@ export const useOptimisticSaleProducts = (saleId: string) => {
 
     try {
       await deleteProduct(id);
+      
+      // Refresh the products list from server to ensure consistency
+      await fetchProducts();
+      
       toast({
         title: "Success",
         description: "Product deleted successfully",
@@ -147,7 +152,7 @@ export const useOptimisticSaleProducts = (saleId: string) => {
         return newMap;
       });
     }
-  }, [products, deleteProduct, toast]);
+  }, [products, deleteProduct, fetchProducts, toast]);
 
   const reorderOptimisticProducts = useCallback(async (productIds: string[]) => {
     const currentOrder = [...products];
@@ -163,6 +168,10 @@ export const useOptimisticSaleProducts = (saleId: string) => {
 
     try {
       await reorderProducts(productIds);
+      
+      // Refresh the products list from server to ensure consistency
+      await fetchProducts();
+      
       toast({
         title: "Success",
         description: "Products reordered successfully",
@@ -176,7 +185,7 @@ export const useOptimisticSaleProducts = (saleId: string) => {
         variant: "destructive"
       });
     }
-  }, [products, reorderProducts, toast]);
+  }, [products, reorderProducts, fetchProducts, toast]);
 
   const isPending = useCallback((id: string) => {
     return pendingOperations.has(id);
