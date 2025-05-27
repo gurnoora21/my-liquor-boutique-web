@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
@@ -7,8 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Upload, Crop as CropIcon } from 'lucide-react';
+import { Upload, Crop as CropIcon, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useSaleProducts } from '@/hooks/useSales';
+import { usePriceValidation } from '@/hooks/usePriceValidation';
 import { supabase } from '@/integrations/supabase/client';
 import { SaleProduct, ProductCategory } from '@/types/sales';
 import 'react-image-crop/dist/ReactCrop.css';
@@ -59,15 +59,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
 
   const watchedOriginalPrice = form.watch('original_price');
   const watchedSalePrice = form.watch('sale_price');
+  const watchedCategory = form.watch('category');
 
-  // Calculate savings and percentage
-  const savings = watchedOriginalPrice - watchedSalePrice;
-  const savingsPercent = watchedOriginalPrice > 0 
-    ? Math.round((savings / watchedOriginalPrice) * 100)
-    : 0;
-
-  // Price validation
-  const isPriceValid = watchedSalePrice > 0 && watchedSalePrice < watchedOriginalPrice;
+  // Enhanced real-time price validation with category awareness
+  const priceValidation = usePriceValidation(watchedOriginalPrice, watchedSalePrice, watchedCategory);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -153,19 +148,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
   };
 
   const onSubmit = async (data: FormData) => {
-    // Validate prices
-    if (data.sale_price >= data.original_price) {
+    // Use validation hook for consistency
+    if (!priceValidation.isValid) {
       form.setError('sale_price', {
         type: 'manual',
-        message: 'Sale price must be lower than original price'
-      });
-      return;
-    }
-
-    if (data.sale_price <= 0) {
-      form.setError('sale_price', {
-        type: 'manual',
-        message: 'Sale price must be greater than 0'
+        message: priceValidation.error || 'Invalid pricing'
       });
       return;
     }
@@ -273,14 +260,29 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
                       type="number" 
                       step="0.01" 
                       placeholder="32.99"
-                      className={!isPriceValid && watchedSalePrice > 0 ? 'border-red-500' : ''}
+                      className={priceValidation.error ? 'border-red-500' : priceValidation.isValid && watchedSalePrice > 0 ? 'border-green-500' : ''}
                       {...field}
                       onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
                   </FormControl>
                   <FormMessage />
-                  {!isPriceValid && watchedSalePrice > 0 && (
-                    <p className="text-sm text-red-600">Sale price must be lower than original price</p>
+                  {priceValidation.error && (
+                    <div className="flex items-center gap-1 text-sm text-red-600">
+                      <AlertTriangle className="w-4 h-4" />
+                      {priceValidation.error}
+                    </div>
+                  )}
+                  {priceValidation.warning && priceValidation.isValid && (
+                    <div className="flex items-center gap-1 text-sm text-amber-600">
+                      <AlertTriangle className="w-4 h-4" />
+                      {priceValidation.warning}
+                    </div>
+                  )}
+                  {priceValidation.suggestion && (
+                    <div className="flex items-center gap-1 text-sm text-blue-600">
+                      <CheckCircle className="w-4 h-4" />
+                      💡 {priceValidation.suggestion}
+                    </div>
                   )}
                 </FormItem>
               )}
@@ -315,11 +317,14 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
             />
           </div>
 
-          {savings > 0 && isPriceValid && (
+          {priceValidation.isValid && watchedSalePrice > 0 && (
             <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-              <p className="text-green-800 font-medium">
-                💰 Savings: ${savings.toFixed(2)} ({savingsPercent}% off)
-              </p>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+                <p className="text-green-800 font-medium">
+                  💰 Savings: ${priceValidation.savings} ({priceValidation.savingsPercent}% off)
+                </p>
+              </div>
             </div>
           )}
 
@@ -354,7 +359,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!isPriceValid || uploading}>
+            <Button type="submit" disabled={!priceValidation.isValid || uploading}>
               {product ? 'Update Product' : 'Add Product'}
             </Button>
           </div>
