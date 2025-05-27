@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
@@ -7,10 +8,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Upload, Crop as CropIcon, AlertTriangle, CheckCircle } from 'lucide-react';
-import { useSaleProducts } from '@/hooks/useSales';
+import { useOptimisticSaleProducts } from '@/hooks/useOptimisticSales';
 import { usePriceValidation } from '@/hooks/usePriceValidation';
 import { supabase } from '@/integrations/supabase/client';
 import { SaleProduct, ProductCategory } from '@/types/sales';
+import { useToast } from '@/hooks/use-toast';
 import 'react-image-crop/dist/ReactCrop.css';
 
 interface ProductFormProps {
@@ -23,14 +25,15 @@ interface ProductFormProps {
 interface FormData {
   product_name: string;
   category: ProductCategory;
-  original_price: number;
-  sale_price: number;
+  original_price: string;
+  sale_price: string;
   size?: string;
   badge_text?: string;
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, onCancel }) => {
-  const { addProduct, updateProduct } = useSaleProducts(saleId);
+  const { addProduct, updateProduct } = useOptimisticSaleProducts(saleId);
+  const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState(product?.product_image || '');
   const [showCropModal, setShowCropModal] = useState(false);
@@ -50,15 +53,15 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
     defaultValues: {
       product_name: product?.product_name || '',
       category: product?.category || 'spirits',
-      original_price: product?.original_price || 0,
-      sale_price: product?.sale_price || 0,
+      original_price: product?.original_price ? product.original_price.toString() : '',
+      sale_price: product?.sale_price ? product.sale_price.toString() : '',
       size: product?.size || '',
       badge_text: product?.badge_text || '',
     },
   });
 
-  const watchedOriginalPrice = form.watch('original_price');
-  const watchedSalePrice = form.watch('sale_price');
+  const watchedOriginalPrice = parseFloat(form.watch('original_price')) || 0;
+  const watchedSalePrice = parseFloat(form.watch('sale_price')) || 0;
   const watchedCategory = form.watch('category');
 
   // Enhanced real-time price validation with category awareness
@@ -116,7 +119,14 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
   };
 
   const handleCropConfirm = async () => {
-    if (!imgRef.current || !completedCrop) return;
+    if (!imgRef.current || !completedCrop) {
+      toast({
+        title: "Error",
+        description: "Please select a crop area",
+        variant: "destructive"
+      });
+      return;
+    }
 
     try {
       setUploading(true);
@@ -140,15 +150,44 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
       setShowCropModal(false);
       setSelectedFile(null);
       setImageSrc('');
+      
+      toast({
+        title: "Success",
+        description: "Image uploaded successfully",
+      });
     } catch (error) {
       console.error('Error uploading cropped image:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setUploading(false);
     }
   };
 
   const onSubmit = async (data: FormData) => {
-    // Use validation hook for consistency
+    // Validate prices
+    const originalPrice = parseFloat(data.original_price);
+    const salePrice = parseFloat(data.sale_price);
+
+    if (isNaN(originalPrice) || originalPrice <= 0) {
+      form.setError('original_price', {
+        type: 'manual',
+        message: 'Please enter a valid original price'
+      });
+      return;
+    }
+
+    if (isNaN(salePrice) || salePrice <= 0) {
+      form.setError('sale_price', {
+        type: 'manual',
+        message: 'Please enter a valid sale price'
+      });
+      return;
+    }
+
     if (!priceValidation.isValid) {
       form.setError('sale_price', {
         type: 'manual',
@@ -159,11 +198,18 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
 
     try {
       const productData = {
-        ...data,
+        product_name: data.product_name,
+        category: data.category,
+        original_price: originalPrice,
+        sale_price: salePrice,
+        size: data.size || null,
+        badge_text: data.badge_text?.trim() || null, // Only save badge if not empty
         sale_id: saleId,
-        product_image: imageUrl,
+        product_image: imageUrl || null,
         position: product?.position || 0,
       };
+
+      console.log('Submitting product data:', productData);
 
       if (product) {
         await updateProduct(product.id, productData);
@@ -171,9 +217,19 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
         await addProduct(productData);
       }
 
+      toast({
+        title: "Success",
+        description: `Product ${product ? 'updated' : 'added'} successfully`,
+      });
+
       onSuccess();
     } catch (error) {
       console.error('Failed to save product:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : `Failed to ${product ? 'update' : 'add'} product`,
+        variant: "destructive"
+      });
     }
   };
 
@@ -227,7 +283,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
             <FormField
               control={form.control}
               name="original_price"
-              rules={{ required: 'Original price is required', min: { value: 0.01, message: 'Price must be greater than 0' } }}
+              rules={{ required: 'Original price is required' }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Original Price ($)</FormLabel>
@@ -237,7 +293,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
                       step="0.01" 
                       placeholder="39.99"
                       {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -248,10 +305,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
             <FormField
               control={form.control}
               name="sale_price"
-              rules={{ 
-                required: 'Sale price is required',
-                min: { value: 0.01, message: 'Price must be greater than 0' }
-              }}
+              rules={{ required: 'Sale price is required' }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Sale Price ($)</FormLabel>
@@ -262,7 +316,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
                       placeholder="32.99"
                       className={priceValidation.error ? 'border-red-500' : priceValidation.isValid && watchedSalePrice > 0 ? 'border-green-500' : ''}
                       {...field}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -312,6 +367,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
                     <Input placeholder="Big Size, Limited Time, etc." {...field} />
                   </FormControl>
                   <FormMessage />
+                  <p className="text-xs text-gray-500">Leave empty for no badge</p>
                 </FormItem>
               )}
             />
@@ -367,7 +423,13 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
       </Form>
 
       {/* Image Crop Modal */}
-      <Dialog open={showCropModal} onOpenChange={setShowCropModal}>
+      <Dialog open={showCropModal} onOpenChange={(open) => {
+        if (!open && !uploading) {
+          setShowCropModal(false);
+          setSelectedFile(null);
+          setImageSrc('');
+        }
+      }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -410,10 +472,13 @@ const ProductForm: React.FC<ProductFormProps> = ({ saleId, product, onSuccess, o
                 type="button"
                 variant="outline"
                 onClick={() => {
-                  setShowCropModal(false);
-                  setSelectedFile(null);
-                  setImageSrc('');
+                  if (!uploading) {
+                    setShowCropModal(false);
+                    setSelectedFile(null);
+                    setImageSrc('');
+                  }
                 }}
+                disabled={uploading}
               >
                 Cancel
               </Button>
